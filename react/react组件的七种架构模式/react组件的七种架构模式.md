@@ -8,10 +8,57 @@ react是一个基础类库, 你可以基于react组件高复用的优势, 把用
 
 所以, 哪怕是业务场景复杂, 时间赶或者在毫无准备的情况下接到了紧急需求, 你也要保证代码设计的不要偏离自由组合以及高复用性这两个核心点
 
-![image]("https://github.com/ReusLi/Article/blob/master/react/work-life-balance.jpg?raw=true")
+![image]("https://github.com/ReusLi/Article/blob/master/react/work-life-balance.jpg")
 
 
-![image]("https://github.com/ReusLi/Article/raw/master/react/work-life-balance.jpg?raw=true")
+![image]("https://github.com/ReusLi/Article/raw/master/react/work-life-balance.jpg")
 
 ![image]("https://raw.githubusercontent.com/ReusLi/Article/master/react/work-life-balance.jpg")
 
+![image]("/work-life-balance.jpg")
+
+不幸的是, 经常会有一些错误的观点出现在我们的视线中, 比如:
+
+* **写功能大而全的组件**
+* **组件之间紧耦合**
+* **不需要单元测试**
+
+这些错误的观点, 导致我们增加了许多[技术债务]("https://www.nczonline.net/blog/2012/02/22/understanding-technical-debt/"), 慢慢地, 我们会发现代码的维护和新功能的增加变得异常困难
+
+当我在写react应用时, 我经常会问自己3个问题:
+* **如何正确地构造组件?**
+* **组件达到什么规模时需要分割?**
+* **如何设计组件之间的通信才不会让组件之间变得紧耦合?**
+
+幸运的是, 健壮的组件之间是有共同特征的, 让我们一起来学习这7种让组件变得更健壮的架构模式
+
+
+## 目录
+* ["单一职责"](#1)
+* [1.1多重责任的陷阱](#1.1)
+* [1.2案例研究：使组件承担一项责任](#1.2)
+* [1.3案例研究：HOC赞成单一职责原则](#1.3)
+* ["封装"](#2)
+* [2.1信息隐藏](#2.1)
+* [2.2沟通](#2.2)
+* [2.3案例研究：封装修复](#2.3)
+* ["可组合"](#3)
+* [3.1组成好处](#3.1)
+* ["可重复使用的"](#4)
+* [4.1跨应用程序重用](#4.1)
+* [4.2重用第三方库](#4.2)
+* ["纯"或"几乎纯"](#5)
+* [5.1案例研究：从全局变量中纯化](#5.1)
+* [5.2案例研究：从网络请求中净化](#5.2)
+* [5.3将几乎纯粹转化为纯粹](#5.3)
+* ["可测试"和"测试"](#6)
+* [6.1案例研究：可测试的手段设计良好](#6.1)
+* ["有意义"](#7)
+* [7.1组件命名](#7.1)
+* [7.2案例研究：编写不言自明的代码](#7.2)
+* [7.3表现力的楼梯](#7.3)
+* [做不断的改进](#8)
+* [可靠性很重要](#9)
+* [结论](#10)
+
+<h2 id="1">单一职责</h2>
