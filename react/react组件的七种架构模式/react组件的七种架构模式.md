@@ -8,4 +8,10 @@ react是一个基础类库, 你可以基于react组件高复用的优势, 把用
 
 所以, 哪怕是业务场景复杂, 时间赶或者在毫无准备的情况下接到了紧急需求, 你也要保证代码设计的不要偏离自由组合以及高复用性这两个核心点
 
+![image]("https://github.com/ReusLi/Article/blob/master/react/work-life-balance.jpg?raw=true")
+
+
+![image]("https://github.com/ReusLi/Article/raw/master/react/work-life-balance.jpg?raw=true")
+
 ![image]("https://raw.githubusercontent.com/ReusLi/Article/master/react/work-life-balance.jpg")
+
