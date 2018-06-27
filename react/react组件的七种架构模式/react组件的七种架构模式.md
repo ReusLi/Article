@@ -131,3 +131,116 @@ react是一个基础类库, 你可以基于react组件高复用的优势, 把用
 最糟糕的多职责组件叫 `<God Component>`  , 比如: `<Application>`, `<Manager>`, `<BigContainer>`, `<Page>` 这些组件动辄超过500行代码.
 
 <h2 id="1.2">1.2 案例研究, 让你的组件只拥有一种职责</h2>
+
+假如, 有一个组件, 目前它作用是通过一个HTTP请求获取当前的天气数据, 拿到数据后会通过更新状态来把数据显示在页面上. 代码实现大概是这样的:
+
+```typescript
+import axios from 'axios';  
+
+// Problem: A component with multiple responsibilities 
+class Weather extends Component {  
+   constructor(props) {
+     super(props);
+     this.state = { temperature: 'N/A', windSpeed: 'N/A' };
+   }
+
+   render() {
+     const { temperature, windSpeed } = this.state;
+     return (
+       <div className="weather">
+         <div>Temperature: {temperature}°C</div>
+         <div>Wind: {windSpeed}km/h</div>
+       </div>
+     );
+   }
+
+   componentDidMount() {
+     axios.get('http://weather.com/api').then(function(response) {
+       const { current } = response.data; 
+       this.setState({
+         temperature: current.temperature,
+         windSpeed: current.windSpeed
+       })
+     });
+   }
+}
+```
+
+在处理类似的问题时, 要经常问自己: 我需要把这个组件分拆成更小的组件吗?  最标准的答案是: 根据组件的职责来决定.
+
+`<Weather>` 组件有2个可以影响它变动的因素:
+
+* 取数操作, 在react的componentDidMount阶段, 可能因为url或数据格式变动而需要改动
+* 数据的可视化操作, 在react的render阶段, 当要求数据的展现形式发生改变时, 逻辑会需要变动
+
+因此, 我们需要把这2个职责分离开来, 变成 `<WeatherFetch>` 和 `<WeatherInfo>`,
+`<WeatherFetch>` 负责取数, `<WeatherInfo>` 负责展示, 代码如下:
+
+```typescript
+import axios from 'axios';  
+
+// Solution: Make the component responsible only for fetching
+class WeatherFetch extends Component {  
+   constructor(props) {
+     super(props);
+     this.state = { temperature: 'N/A', windSpeed: 'N/A' };
+   }
+
+   render() {
+     const { temperature, windSpeed } = this.state;
+     return (
+       <WeatherInfo temperature={temperature} windSpeed={windSpeed} />
+     );
+   }
+
+   componentDidMount() {
+     axios.get('http://weather.com/api').then(function(response) {
+       const { current } = response.data; 
+       this.setState({
+         temperature: current.temperature,
+         windSpeed: current.windSpeed
+       });
+     });
+   }
+}
+```
+
+这样做的好处是什么?
+
+例如: 你可能需要用 `async/await` 来代替  `promises`
+
+```typescript
+// Reason to change: use async/await syntax
+class WeatherFetch extends Component {  
+   // ..... //
+   async componentDidMount() {
+     const response = await axios.get('http://weather.com/api');
+     const { current } = response.data; 
+     this.setState({
+       temperature: current.temperature,
+       windSpeed: current.windSpeed
+     });
+   }
+}
+```
+
+又例如: 你可能需要在风速为0的时候不是显示 `0km/h`, 而是显示 `calm`
+
+```typescript
+// Reason to change: handle calm wind  
+function WeatherInfo({ temperature, windSpeed }) {  
+   const windInfo = windSpeed === 0 ? 'calm' : `${windSpeed} km/h`;
+   return (
+     <div className="weather">
+       <div>Temperature: {temperature}°C</div>
+       <div>Wind: {windInfo}</div>
+     </div>
+   );
+}
+```
+
+无论是哪一种, 都因为2个职责被分离了, 而降低了影响相互间功能的可能性
+
+`<WeatherFetch>`和`<WeatherInfo>`有自己的责任。
+一个组件的更改对另一个组件的影响很小。
+这就是单一责任原则的优势：分离地进行修改，这样做对系统的影响是轻微并且可预测的。
