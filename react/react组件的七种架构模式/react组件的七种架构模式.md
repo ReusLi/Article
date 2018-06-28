@@ -134,7 +134,7 @@ react是一个基础类库, 你可以基于react组件高复用的优势, 把用
 
 假如, 有一个组件, 目前它作用是通过一个HTTP请求获取当前的天气数据, 拿到数据后会通过更新状态来把数据显示在页面上. 代码实现大概是这样的:
 
-```typescript
+```js
 import axios from 'axios';  
 
 // Problem: A component with multiple responsibilities 
@@ -176,7 +176,7 @@ class Weather extends Component {
 因此, 我们需要把这2个职责分离开来, 变成 `<WeatherFetch>` 和 `<WeatherInfo>`,
 `<WeatherFetch>` 负责取数, `<WeatherInfo>` 负责展示, 代码如下:
 
-```typescript
+```js
 import axios from 'axios';  
 
 // Solution: Make the component responsible only for fetching
@@ -209,7 +209,7 @@ class WeatherFetch extends Component {
 
 例如: 你可能需要用 `async/await` 来代替  `promises`
 
-```typescript
+```js
 // Reason to change: use async/await syntax
 class WeatherFetch extends Component {  
    // ..... //
@@ -226,7 +226,7 @@ class WeatherFetch extends Component {
 
 又例如: 你可能需要在风速为0的时候不是显示 `0km/h`, 而是显示 `calm`
 
-```typescript
+```js
 // Reason to change: handle calm wind  
 function WeatherInfo({ temperature, windSpeed }) {  
    const windInfo = windSpeed === 0 ? 'calm' : `${windSpeed} km/h`;
@@ -244,3 +244,171 @@ function WeatherInfo({ temperature, windSpeed }) {
 `<WeatherFetch>`和`<WeatherInfo>`有自己的责任。
 一个组件的更改对另一个组件的影响很小。
 这就是单一责任原则的优势：分离地进行修改，这样做对系统的影响是轻微并且可预测的。
+
+<h2 id="1.3">1.3 用例学习: 高阶组件最爱单一职责模式</h2>
+
+现在,我们来从高阶组件(HOC: height order component)的例子中学习一下单一职责的好处.
+
+>高阶组件(HOC)是一个接收一个组件并返回一个新组件的函数。
+
+HOC的常见用法是: 为组件提供额外的props属性或修改已经存在的props值, 这种技术被称为props代理.
+
+```js
+function withNewFunctionality(WrappedComponent) {  
+  return class NewFunctionality extends Component {
+    render() {
+      const newProp = 'Value';
+      const propsProxy = {
+         ...this.props,
+         // Alter existing prop:
+         ownProp: this.props.ownProp + ' was modified',
+         // Add new prop:
+         newProp
+      };
+      return <WrappedComponent {...propsProxy} />;
+    }
+  }
+}
+const MyNewComponent = withNewFunctionality(MyComponent);  
+```
+
+您也可以通过修改包装组件呈现的元素来挂钩到呈现机制。
+这种HOC技术被称为渲染劫持：
+
+```js
+function withModifiedChildren(WrappedComponent) {  
+  return class ModifiedChildren extends WrappedComponent {
+    render() {
+      const rootElement = super.render();
+      const newChildren = [
+        ...rootElement.props.children, 
+        // Insert a new child:
+        `<div>New child</div>`
+      ];
+      return cloneElement(
+        rootElement, 
+        rootElement.props, 
+        newChildren
+      );
+    }
+  }
+}
+const MyNewComponent = withModifiedChildren(MyComponent);  
+```
+
+如果你想深入了解HOC, 可以阅读这篇文章: [react高阶组件的深入了解](https://medium.com/@franleplant/react-higher-order-components-in-depth-cf9032ee6c3e)
+
+让我们一起来看一下, HOC是怎么体现单一职责原则的.
+
+组件`<PersistentForm>`由一个输入框`input`和保存按钮`button`组成, `input`的值在输入后被保存在`localstorage`, 当改变输入值时, 点击保存按钮`button`, 会更新`localstorage`的值
+
+代码如下:
+
+```js
+class PersistentForm extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { inputValue: localStorage.getItem('inputValue') };
+    this.handleChange = this.handleChange.bind(this);
+    this.handleClick = this.handleClick.bind(this);
+  }
+
+  render() {
+    const { inputValue } = this.state;
+    return (
+      <div>
+        <input type="text" value={inputValue} 
+          onChange={this.handleChange}/> 
+        <button onClick={this.handleClick}>Save to storage</button>
+      </div>
+    )
+  }
+
+  handleChange(event) {
+    this.setState({
+      inputValue: event.target.value
+    });
+  }
+
+  handleClick() {
+    localStorage.setItem('inputValue', this.state.inputValue);
+  }
+}
+
+ReactDOM.render(<PersistentForm />, document.getElementById('root')); 
+```
+
+当`input`输入框值变化时, 会在`handleChange`函数内更新数据, 当点击保存`button`时会在handleClick里保存数据
+
+现在, `<PersistentForm>`组件有2个因素可影响它的变动:
+* 表单`input`的管理
+* 保存操作的管理
+
+让我们重构`<PersistentForm>`, 让它变成单一职责: 
+
+* **渲染表单字段并附加事件处理程序, 这个过程它不应该知道如何直接使用存储**
+
+```js
+class PersistentForm extends Component {  
+  constructor(props) {
+    super(props);
+    this.state = { inputValue: props.initialValue };
+    this.handleChange = this.handleChange.bind(this);
+    this.handleClick = this.handleClick.bind(this);
+  }
+
+  render() {
+    const { inputValue } = this.state;
+    return (
+      <div className="persistent-form">
+        <input type="text" value={inputValue} 
+          onChange={this.handleChange}/> 
+        <button onClick={this.handleClick}>Save to storage</button>
+      </div>
+    );
+  }
+
+  handleChange(event) {
+    this.setState({
+      inputValue: event.target.value
+    });
+  }
+
+  handleClick() {
+    this.props.saveValue(this.state.inputValue);
+  }
+}
+```
+
+组件从prop initialValue接收存储的输入值，并使用prop的函数saveValue（newValue）保存输入值。
+
+`props`由使用道具代理技术的Persistence（）HOC提供。
+
+现在`<PersistentForm>`组件已经符合SRP原则, 只有一个因素可以影响它的变动, 因为保存管理的因素已经被转移到了父组件上
+
+```js
+function withPersistence(storageKey, storage) {  
+  return function(WrappedComponent) {
+    return class PersistentComponent extends Component {
+      constructor(props) {
+        super(props);
+        this.state = { initialValue: storage.getItem(storageKey) };
+      }
+
+      render() {
+         return (
+           <WrappedComponent
+             initialValue={this.state.initialValue}
+             saveValue={this.saveValue}
+             {...this.props}
+           />
+         );
+      }
+
+      saveValue(value) {
+        storage.setItem(storageKey, value);
+      }
+    }
+  }
+}
+```
