@@ -412,3 +412,5 @@ function withPersistence(storageKey, storage) {
   }
 }
 ```
+
+withPersistence() 是一个高阶组件, 它不需要知道表单是如何实现的, 它只关心自己的工作, 提供初始化的值和保存的方法.
