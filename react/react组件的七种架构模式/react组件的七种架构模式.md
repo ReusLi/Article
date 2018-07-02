@@ -414,3 +414,40 @@ function withPersistence(storageKey, storage) {
 ```
 
 withPersistence() 是一个高阶组件, 它不需要知道表单是如何实现的, 它只关心自己的工作, 提供初始化的值和保存的方法.
+
+把 `<PersistentForm>` 和 `withPersistence()` 写成一个组件 `<LocalStoragePersistentForm>`. 
+
+```js
+const LocalStoragePersistentForm  
+  = withPersistence('key', localStorage)(PersistentForm);
+
+const instance = <LocalStoragePersistentForm />;  
+```
+
+这时`withPersistence()`的任何修改都不会干扰到`<PersistentForm>`的`初始化`和`保存`逻辑.
+
+反之, `<PersistentForm>`的任何修改也不会干扰到表单的处理逻辑.
+
+我们再次重申SRP原则: 允许单独修改模块, 并且尽可能少地影响其他模块.
+
+而且会使模块的重用性增加了, 你可以在任何地方引入这个模块:
+
+```js
+const LocalStorageMyOtherForm  
+  = withPersistence('key', localStorage)(MyOtherForm);
+
+const instance = <LocalStorageMyOtherForm />;  
+```
+
+你可以很容易地修改逻辑, 比如把储存方式改成sessionStorage: 
+
+```js
+const SessionStoragePersistentForm  
+  = withPersistence('key', sessionStorage)(PersistentForm);
+
+const instance = <SessionStoragePersistentForm />;  
+```
+
+In situations when composition is ineffective `(还没想好怎么翻译)`
+
+`props proxy(属性代理)` 和 `render highjacking(渲染劫持)` 的高阶组件技术让组件职责分离的做法变得非常轻松.
