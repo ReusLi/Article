@@ -451,3 +451,8 @@ const instance = <SessionStoragePersistentForm />;
 In situations when composition is ineffective `(还没想好怎么翻译)`
 
 `props proxy(属性代理)` 和 `render highjacking(渲染劫持)` 的高阶组件技术让组件职责分离的做法变得非常轻松.
+
+<h1 id="2">2. 封装</h2>
+
+> 封装一个组件, 指的是为组件提供props来控制它的行为, 同时不暴漏它的内部实现和结构
+
