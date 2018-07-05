@@ -463,3 +463,7 @@ In situations when composition is ineffective `(还没想好怎么翻译)`
 
 松耦合的目的是减少组件之间的关联.
 
+封装, 是设计组装时的基本原则, 也是松耦合的关键
+
+<h2 id="2.1"> 2.1 信息隐藏 </h2>
+
