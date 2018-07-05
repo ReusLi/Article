@@ -1,6 +1,6 @@
 ### 原文链接 :
 
-[7 architectural attributes of a reliable React component ](https://dmitripavlutin.com/7-architectural-attributes-of-a-reliable-react-component/#1singleresponsibility)
+[7 architectural attributes of a reliable React component ](https://dmitripavlutin.com/7-architectural-attributes-of-a-reliable-react-component)
 
 react是一个基础类库, 你可以基于react组件高复用的优势, 把用户界面分割成一个个小的组件
 
