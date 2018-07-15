@@ -472,3 +472,6 @@ In situations when composition is ineffective `(还没想好怎么翻译)`
 
 一般来说, 我们建议对props属性的赋值是原始类型的数据, 如 string number boolean等
 
+注意: 为了避免破坏封装的原则, 在父子组件传递Props的时候, 我们不应该因为传递props而暴漏组件内部的实现. 那些把整个component当成props传递下去的做法更是错误的.
+
+<h2 id="2.3"> 用例学习: 封装恢复(encapsulation restoration好像翻译不对) </h2>
