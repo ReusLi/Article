@@ -475,3 +475,56 @@ In situations when composition is ineffective `(还没想好怎么翻译)`
 注意: 为了避免破坏封装的原则, 在父子组件传递Props的时候, 我们不应该因为传递props而暴漏组件内部的实现. 那些把整个component当成props传递下去的做法更是错误的.
 
 <h2 id="2.3"> 用例学习: 封装恢复(encapsulation restoration好像翻译不对) </h2>
+
+一个简单的列子,  1个数字和2个按钮,  按钮分别控制数字的加和减
+
+这个应用会由2部分组成 `<App> ` 和 `<Controls>`
+
+`<App>` 组件的 `state` 里面包含了 `number` 状态: 
+
+```js
+// Problem: Broken encapsulation
+class App extends Component {  
+  constructor(props) {
+    super(props);
+    this.state = { number: 0 };
+  }
+
+  render() {
+    return (
+      <div className="app"> 
+        <span className="number">{this.state.number}</span>
+        <Controls parent={this} />
+      </div>
+    );
+  }
+}
+```
+
+`<Controls>` 组件包含按钮和对应的click事件
+
+```js
+// Problem: Using internal structure of parent component
+class Controls extends Component {  
+  render() {
+    return (
+      <div className="controls">
+        <button onClick={() => this.updateNumber(+1)}>
+          Increase
+        </button> 
+        <button onClick={() => this.updateNumber(-1)}>
+          Decrease
+        </button>
+      </div>
+    );
+  }
+
+  updateNumber(toAdd) {
+    this.props.parent.setState(prevState => ({
+      number: prevState.number + toAdd       
+    }));
+  }
+}
+```
+
+以上的实现会有什么问题? 这看起来像是我们日常工作上的正常做法.
