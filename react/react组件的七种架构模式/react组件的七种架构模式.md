@@ -528,3 +528,206 @@ class Controls extends Component {
 ```
 
 以上的实现会有什么问题? 这看起来像是我们日常工作上的正常做法.
+
+第一个问题是, `<App>` 没有封装的特性, 因为我们可以从 `<Controls>` 内部直接更新 `<App>`的状态
+
+第二个问题是, `<Controls>` 需要知道太多 `<App>`的细节,  `<Controls>` 需要知道 `<App>`的number的结构, 万一以后 number的结构改变了, `<Controls>`也需要跟着变
+
+这2个问题, 使得2个组件耦合在一起, 是非常不好的
+
+还有一个问题是, `<Controls>`很难进行测试, 因为number是来自父级组件的
+
+那么, 对于这类问题的解决方案是: 
+
+根据松耦合和强封装原则, 重新设计父子组件的关系
+
+1. 只有组件本身应该了解state状态, 所以 `updateNumber`方法应该放到 `<App>`
+
+2. `<App>` 应该对外提供接口来操作number状态
+
+所以代码应该是下面这样的:
+
+```js
+// Solution: Restore encapsulation
+class App extends Component {  
+  constructor(props) {
+    super(props);
+    this.state = { number: 0 };
+  }
+
+  render() {
+    return (
+      <div className="app"> 
+        <span className="number">{this.state.number}</span>
+        <Controls 
+          onIncrease={() => this.updateNumber(+1)}
+          onDecrease={() => this.updateNumber(-1)} 
+        />
+      </div>
+    );
+  }
+
+  updateNumber(toAdd) {
+    this.setState(prevState => ({
+      number: prevState.number + toAdd       
+    }));
+  }
+}
+```
+
+此外, `<Controls>` 应该是一个 `功能组件`, 如下: 
+
+```js
+// Solution: Use callbacks to update parent state
+function Controls({ onIncrease, onDecrease }) {  
+  return (
+    <div className="controls">
+      <button onClick={onIncrease}>Increase</button> 
+      <button onClick={onDecrease}>Decrease</button>
+    </div>
+  );
+}
+```
+
+`<Controls>` 的可重用性和可测试性明显增强
+重复使用`<Controls>`很方便，因为它只需要回调，没有任何其他依赖。
+测试也很方便：只需验证是否在单击按钮时执行回调（参见6.1案例研究）。
+
+<h1 id="3">3.组合</h1>
+
+>可组合组件由较小的专用组件的组合创建。
+
+<h2 id="3.1">3.1 组合的好处: 单一责任原则</h2>
+
+写react时, 需要用到组合的其中一个重要原因是: 能够把大型, 复杂的组件分析成小型的单一组件
+
+这种分解, 类似单一责任原则
+
+组合之重用性
+
+看下面的例子: 
+
+```js 
+const instance1 = (  
+  <Composed1>
+    /* Composed1 的业务代码...*/
+    /* 公共代码... */
+  </Composed1>
+);
+const instance2 = (  
+  <Composed2>
+    /* 公共代码... */
+    /* Composed2 的业务代码...*/
+  </Composed2>
+);
+```
+
+首先，将公共代码封装在新组件`<Common>`中。
+其次，`<Composed1>`和`<Composed2>`应该使用组合来包含`<Common>`，修复代码重复：
+
+```js
+const instance1 = (  
+  <Composed1>
+    <Piece1 />
+    <Common />
+  </Composed1>
+);
+const instance2 = (  
+  <Composed2>
+    <Common />
+    <Piece2 />
+  </Composed2>
+);
+```
+
+组合之灵活性
+
+在React中，可组合组件可以控制其子组件，通常通过子组件prop。
+这带来了灵活性的另一个好处。
+
+例如:
+
+```js
+function ByDevice({ children: { mobile, other } }) {  
+  return Utils.isMobile() ? mobile : other;
+}
+
+<ByDevice>{{  
+  mobile: <div>Mobile detected!</div>,
+  other:  <div>Not a mobile device</div>
+}}</ByDevice>
+```
+
+组合之效率性
+
+用户界面是可组合的层次结构。
+因此，组件的组合是构造用户界面的有效方式。
+
+<h1 id="4">4. 重用</h1>
+
+>可重用组件只写一次但多次使用。
+
+<h2 id="4.2">4.2 开发中的代码重用</h2>
+
+根据DRY原则( `Don't repeat yourself` )，每一段代码必须在系统中具有单一性，明确性。
+避免重复代码。
+
+代码的重复会导致开发期的代码复杂性和维护期成本的增加
+
+然而, 要达到重用性一个重要原因就是单一职责原则
+
+根据单一职责原则: 
+
+>重用组件实际上意味着重用其责任实施。
+
+只有一个责任的组件最容易重用。
+
+但是当一个组件有多个职责时，它的重用会增加很多开发成本。
+
+这种情况往往是, 你想使用一个组件, 但需要根据组件的具体情况花更多的时间去"配合组件", 达到使用的目的
+
+这种其实并不是完美的重用
+
+正确的封装会创建一个不依赖于依赖关系的组件。
+隐藏的内部结构和聚焦道具使组件能够很好地适应多个可以重复使用的地方。
+
+
+<h2 id="4.3">4.3 重用第三方库</h2>
+
+
+React生态十分的强大, 例如:
+
+[brillout / awesome-react-components ](https://github.com/brillout/awesome-react-components)
+
+里面就包括了很多可复用的第三方资源
+
+好的第三方库会在开发中帮助你不少
+
+根据经验，最重要的影响因素是`react-router`和`redux`
+
+
+[react-router](https://github.com/ReactTraining/react-router/)
+使用声明式路由来构建单页应用程序。
+
+使用`<Route>`将`URL`路径与组件相关联。
+
+然后路由器将在用户访问匹配的`URL`时为您呈现组件。
+
+
+[redux和react](https://redux.js.org/)
+和
+[react-redux](https://github.com/reduxjs/react-redux)
+HOC引入了单向和可预测的应用程序状态管理。
+它从组件中提取异步和不纯的代码（如HTTP请求），支持单一责任原则并创建纯粹或几乎纯粹的组件。
+
+怎么判断一个第三方库值不值得使用:
+
+1. 文档：readme.md文件和详细文档
+
+2. 测试：代码的单元测试覆盖率
+
+3. 维护：作者创建新功能，修复bug以及维护库的频率。
+
+
+<h1 id="5">5 Pure or Almost-pure</h1>
+
