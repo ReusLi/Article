@@ -731,3 +731,119 @@ HOC引入了单向和可预测的应用程序状态管理。
 
 <h1 id="5">5 Pure or Almost-pure</h1>
 
+>纯组件始终为相同的prop值呈现相同的元素。
+>几乎纯粹的组件总是为相同的prop值渲染相同的元素，并且可以产生副作用。
+
+在函数式编程中，对于给定相同的输入，纯函数总是返回相同的输出。
+让我们看一个简单的纯函数：
+
+```js
+function sum(a, b) {  
+  return a + b;
+}
+sum(5, 10); // => 15  
+```
+
+对于给定的两个数字，sum（）函数总是返回相同的总和。
+
+当函数返回相同输入的不同输出时，该函数变得不纯。
+
+它可能发生，因为该函数依赖于全局状态。
+
+例如：
+
+```js
+let said = false;
+
+function sayOnce(message) {  
+  if (said) {
+    return null;
+  }
+  said = true;
+  return message;
+}
+
+sayOnce('Hello World!'); // => 'Hello World!'  
+sayOnce('Hello World!'); // => null  
+```
+
+`sayOnce（'Hello World！'）`在第一次调用时返回 `'Hello World！'`。
+
+即使使用相同的参数`'Hello World！'`，在以后的调用中，`sayOnce（）`也会返回`null`。
+
+这是一个依赖于全局状态的不纯函数的标志：`said`变量。
+
+`sayOnce（）` 里面有一个声明 `say = true`，修改全局状态。
+
+这会产生副作用，这是不纯函数的另一个标志。
+
+因此，纯函数没有副作用，也不依赖于全局状态。
+
+他们的单一来源是参数。
+
+因此，纯函数是`可预测`和`确定`的，`可重用`且`易于测试`。
+
+React组件应该受益于纯属性。
+
+给定相同的prop值，纯组件（不要与React.PureComponent混淆）总是呈现相同的元素。
+
+例如:
+
+```js
+function Message({ text }) {  
+  return <div className="message">{text}</div>;
+}
+
+<Message text="Hello World!" />  
+// => <div class="message">Hello World</div>
+```
+
+保证相同文本`prop`值的`<Message>`呈现相同的元素。
+并不总是可以使组件纯净。
+有时你必须向外部环境获取信息
+
+例如以下情况：
+
+```js
+class InputField extends Component {  
+  constructor(props) {
+    super(props);
+    this.state = { value: '' };
+    this.handleChange = this.handleChange.bind(this);
+  }
+
+  handleChange({ target: { value } }) {
+    this.setState({ value });
+  }
+
+  render() {
+    return (
+      <div>
+         <input 
+           type="text" 
+           value={this.state.value} 
+           onChange={this.handleChange} 
+         />
+         You typed: {this.state.value}
+      </div>
+    );
+  }
+}
+```
+
+`<InputField>`有状态组件不接受任何`prop`，但是根据输入中的用户类型呈现不同的输出。
+
+`<InputField>`必须是不纯的，因为它通过输入字段访问环境。
+
+大多数应用程序需要全局状态，网络请求，本地存储等。
+
+你可以做的是从你的组件中分离纯净的代码。
+
+分离不纯的代码明确显示它有副作用，或依赖于全局状态。
+
+分离不纯的代码对系统的其余部分具有较小的不可预测性影响。
+
+让我们详细介绍一下净化实例。
+
+
+<h2 id="5.1">5.1 案例研究：从全局变量中纯化</h2>
