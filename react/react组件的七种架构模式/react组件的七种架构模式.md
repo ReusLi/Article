@@ -847,3 +847,42 @@ class InputField extends Component {
 
 
 <h2 id="5.1">5.1 案例研究：从全局变量中纯化</h2>
+
+我不喜欢全局变量。
+它们破坏了封装，产生了不可预测的行为并使测试变得困难。
+
+全局变量可以用作 `mutable` (可变)或 `immutable` (不可变)对象。
+
+变异全局变量会导致组件的不受控制的行为。
+
+随意注入和修改数据，使协同工作变得混乱。
+
+如果需要可变的全局状态，则该解决方案是可预测的应用程序状态管理。
+
+可以考虑使用Redux。
+
+以下语句定义了一个包含站点名称的配置对象：
+
+```js
+export const globalConfig = {  
+  siteName: 'Animals in Zoo'
+};
+```
+
+
+接下来，`<Header>`组件呈现应用程序的标头，包括站点名称“Zoo in Zoo”的显示：
+
+```js
+import { globalConfig } from './config';
+
+export default function Header({ children }) {  
+  const heading = 
+    globalConfig.siteName ? <h1>{globalConfig.siteName}</h1> : null;
+  return (
+     <div>
+       {heading}
+       {children}
+     </div>
+  );
+}
+```
