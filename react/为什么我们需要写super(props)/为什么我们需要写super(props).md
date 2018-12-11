@@ -76,3 +76,5 @@ class PolitePerson extends Person {
 }
 ```
 
+在`super(name)` 之前使用 `this.greetColleagues` 是合法的
+
