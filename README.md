@@ -1,3 +1,3 @@
 # [Introduce]()
 
-Translate some articles in Chinese
+Translate some articles
