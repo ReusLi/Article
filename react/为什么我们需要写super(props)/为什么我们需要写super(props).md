@@ -114,7 +114,7 @@ class Component {
 }
 ```
 
-这就是传递props的原因, [它做了什么 ?](https://overreacted.io/why-do-we-write-super-props/)
+这就是传递props的原因, [它做了什么 ?](https://github.com/facebook/react/blob/1d25aa5787d4e19704c049c3cfa985d3b5190e0d/packages/react/src/ReactBaseClasses.js#L22)
 
 但不知道为什么，即使你没有使用`props`参数调用`super()`，你仍然可以在渲染和其他方法中访问`this.props`
 
