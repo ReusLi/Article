@@ -65,3 +65,53 @@ const result = instance.render(); // <p>Hello</p>
 这篇文章没有太多关于React本身的信息，但我们将讨论`new`，`this`，`class`，`arrow functions,(箭头函数)`，`prototype`，`__ proto__`，`instanceof`以及这些东西如何在`JavaScript`中协同工作的
 
 （如果你真的只想知道答案，请滚动到最后。）
+
+首先，我们需要理解为什么以不同方式处理函数和类很重要。
+注意我们在调用类时如何使用new运算符：
+
+```js
+// If Greeting is a function
+const result = Greeting(props); // <p>Hello</p>
+
+// If Greeting is a class
+const instance = new Greeting(props); // Greeting {}
+const result = instance.render(); // <p>Hello</p>
+```
+
+让我们粗略地了解new运算符在JavaScript中的作用
+
+在过去，`JavaScript`没有`class`。
+但是，你可以用函数来模拟一个`class`。
+
+```js
+// Just a function
+function Person(name) {
+  this.name = name;
+}
+
+var fred = new Person('Fred'); // ✅ Person {name: 'Fred'}
+var george = Person('George'); // 🔴 Won’t work
+```
+
+就像上面的代码, 如果没有new运算符, `george`就会指向`undefined`
+
+```js
+var fred = new Person('Fred'); // Same object as `this` inside `Person`
+```
+
+new运算符还可以让`fred`使用`Person.prototype`里的所有值
+
+```js
+function Person(name) {
+  this.name = name;
+}
+Person.prototype.sayHi = function() {
+  alert('Hi, I am ' + this.name);
+}
+
+var fred = new Person('Fred');
+fred.sayHi();
+```
+
+这就是人们以前已经使用`funtion`来模拟`class`的方式
+
