@@ -115,3 +115,57 @@ fred.sayHi();
 
 这就是人们以前已经使用`funtion`来模拟`class`的方式
 
+如果是你写的是一个函数, `JavaScript` 是没有办法知道你是想当作普通函数那个调用它, 还是想通过`new`的方式来使用它, 所以, 请忘掉刚刚 `new Person()` 那样的做法, 因为那样会让人混乱.
+
+所以新的JavaScript语法已经存在了一段时间。
+但是，class语法是最近的才出现的
+让我们重写上面的代码:
+
+```js
+class Person {
+  constructor(name) {
+    this.name = name;
+  }
+  sayHi() {
+    alert('Hi, I am ' + this.name);
+  }
+}
+
+let fred = new Person('Fred');
+fred.sayHi();
+```
+
+在编程中, 了解代码的语义是非常重要的
+
+如果你写的是一个`Funtion`, Javascript就需要去猜测这个`Funtion`是会像`alert()`一样被调用, 还是会充当构造函数, 这样会让人混乱
+
+而使用`Class`语法, 会使显得清晰很多
+
+```js
+let fred = new Person('Fred');
+// ✅  If Person is a function: works fine
+// ✅  If Person is a class: works fine too
+
+let george = Person('George'); // We forgot `new`
+// 😳 If Person is a constructor-like function: confusing behavior
+// 🔴 If Person is a class: fails immediately
+```
+
+这有助于我们尽早发现错误，而不是等待像this.name那样的一些模糊的bug被视为window.name而不是george.name
+
+但是，这意味着React需要在调用任何类之前使用new。
+它不能只是将其称为常规函数，因为如果这样做了, JavaScript会报错
+
+```js
+class Counter extends React.Component {
+  render() {
+    return <p>Hello</p>;
+  }
+}
+
+// 🔴 React can't just do this:
+const instance = Counter(props);
+```
+
+这会带来麻烦
+
